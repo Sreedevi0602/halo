@@ -16,9 +16,18 @@ logger = logging.getLogger(__name__)
 
 # Create your views here.
 @api_view(['GET'])
-def class_list_view(request):
+def class_list(request):
+    #Get client timezone
     client_tz = get_client_timezone(request)
-    classes = Class.objects.filter(datetime__gte=timezone.now())
+
+    #Filter upcoming classes
+    now = timezone.now()
+    classes = Class.objects.filter(datetime__gte=now)
+
+    if not classes.exists():
+        logger.info("No upcoming classes found.")
+        return Response({"error": "No upcoming classes available."}, status=status.HTTP_200_OK)
+    
     serializer = ClassSerializer(classes, many=True, context={'client_tz': client_tz})
     return Response(serializer.data)
 
