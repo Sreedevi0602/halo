@@ -106,6 +106,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
+USE_TZ = True   #For timezone aware datetimes
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
