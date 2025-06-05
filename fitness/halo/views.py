@@ -8,6 +8,8 @@ import logging
 from rest_framework import status
 import re
 from datetime import timedelta
+from .utils.timezone import get_client_timezone
+import pytz
 
 
 logger = logging.getLogger(__name__)
@@ -15,8 +17,9 @@ logger = logging.getLogger(__name__)
 # Create your views here.
 @api_view(['GET'])
 def class_list_view(request):
+    client_tz = get_client_timezone(request)
     classes = Class.objects.filter(datetime__gte=timezone.now())
-    serializer = ClassSerializer(classes, many=True)
+    serializer = ClassSerializer(classes, many=True, context={'client_tz': client_tz})
     return Response(serializer.data)
 
 
@@ -63,33 +66,47 @@ def book_class(request):
         logger.warning(f"Attempt to overbook class {cls.id}.")
         return Response({"error": "No slots available."}, status=400)
     
-    #Get current datetime
-    now = timezone.now()
+    #Get client's timezone
+    client_tz = get_client_timezone(request)
 
-    #filter for today's bookings by this email
+    #Get current datetime in UTC and convert to client's timezone
+    now_utc = timezone.now()
+    now = now_utc.astimezone(client_tz)
+
+    #Calculate start and end of client's local day
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     today_end = today_start + timedelta(days=1)
+
+    #Calculate start and end of client's local week
+    week_start = today_start - timedelta(days=today_start.weekday())
+    week_end = week_start + timedelta(days=7)
+
+    #Convert back to UTC for querying DB
+    today_start_utc = today_start.astimezone(pytz.UTC)
+    today_end_utc = today_end.astimezone(pytz.UTC)
+    week_start_utc = week_start.astimezone(pytz.UTC)
+    week_end_utc = week_end.astimezone(pytz.UTC)
+
+    #filter for a day's bookings by this email
     today_bookings = Booking.objects.filter(
         client_email = email,
-        booked_at__range = (today_start, today_end)
+        booked_at__range = (today_start_utc, today_end_utc)
     )
 
     #filter for a week's bookings by this email
-    week_start = now - timedelta(days=now.weekday())
-    week_end = week_start + timedelta(days=7)
     weekly_bookings = Booking.objects.filter(
         client_email=email,
-        booked_at__range=(week_start, week_end) 
+        booked_at__range=(week_start_utc, week_end_utc) 
     )
 
-    #Enforce limits
-    if today_bookings.exists():
-        logger.warning(f"Booking denied for {email}: already booked a class today.")
-        return Response({"error": "You have already booked a class today."}, status=400)
+    #Enforce limits (daily=3, weekly=12)
+    if today_bookings.count()>= 3:
+        logger.warning(f"Booking denied for {email}. Exceeded daily booking limit (timezone: {client_tz}).")
+        return Response({"error": "You can only book up to 3 classes per day."}, status=400)
     
-    if weekly_bookings.count() >= 4:
-        logger.warning(f"Booking denied for {email}: exceeded weekly booking limit.")
-        return Response({"error": "You can only book up to 4 classes per week. You have exceeded your weekly booking limit."}, status=400)
+    if weekly_bookings.count() >= 12:
+        logger.warning(f"Booking denied for {email}: exceeded weekly booking limit. (timezone: {client_tz}).")
+        return Response({"error": "You can only book up to 12 classes per week."}, status=400)
     
     if Booking.objects.filter(class_booked=cls, client_email=email).exists():
         logger.info(f"Duplicate booking attempt by {email}.")
@@ -132,5 +149,6 @@ def get_bookings(request):
         return Response({"error": "No bookings found for this email."}, status=404)
     
     logger.info(f"{bookings.count()} bookings found for {email}")
-    serializer = BookingSummarySerializer(bookings, many=True)
+    client_tz = get_client_timezone(request)
+    serializer = BookingSummarySerializer(bookings, many=True, context={'client_tz': client_tz})
     return Response(serializer.data)
