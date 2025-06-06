@@ -105,6 +105,7 @@ pip install djangorestframework
 pip install pytz
 pip install faker
 pip install python-dateutil
+```
 
 ### Setup the database
 
@@ -117,7 +118,7 @@ python manage.py migrate
 
 ```cmd
 python manage.py createsuperuser
-‘’’
+```
 
 ### Run the server
 
