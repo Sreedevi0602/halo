@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.utils import timezone
@@ -6,10 +5,11 @@ from .models import Class, Booking
 from .serializers import ClassSerializer, BookingSerializer, BookingSummarySerializer
 import logging
 from rest_framework import status
-import re
-from datetime import timedelta
 from .utils.timezone import get_client_timezone
-import pytz
+from .utils.validators import is_valid_name ,is_valid_email, is_email_taken
+from .utils.time_bounds import get_daily_bounds, get_weekly_bounds
+from .utils.booking_limits import check_daily_limit, check_weekly_limit, has_duplicate_booking
+
 
 
 logger = logging.getLogger(__name__)
@@ -34,8 +34,11 @@ def class_list(request):
 
 @api_view(['POST'])
 def book_class(request):
+
+    #validates required fields in the request data
     data = request.data
     required_fields = ['class_id', 'client_name', 'client_email']
+    #If any required field is empty store it to missing variable
     missing = [f for f in required_fields if not data.get(f)]
 
     if missing:
@@ -49,78 +52,64 @@ def book_class(request):
     name = data.get('client_name').strip()
     email = data.get('client_email').strip()
 
+
     #Name validation
-    if not re.match(r'^[a-zA-Z ]+$', name):
+    if not is_valid_name(name):
         logger.warning(f"Name validation failed for client_name: '{name}'. Name must contain only letters and spaces.")
-        return Response({"error": "Name must contain only letters and spaces."}),
+        return Response({"error": "Name must contain only letters and spaces."}, status=400)
+
 
     #Email validation
-    if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+    if not is_valid_email(email):
         logger.warning(f"Email validation failed for client_email: '{email}'. Invalid email format.")
         return Response({"error": "Invalid email format."}, status=400)
     
-    existing = Booking.objects.filter(client_email=email).first()
 
-    if existing and existing.client_name != name:
-        logger.warning(f"{email} is already in use by {existing.client_name}. Attempted reuse by {name}.")
+    #Checks if the email is already taken by a user
+    if is_email_taken(email, name):
+        logger.warning(f"{email} is already in use . Attempted reuse by {name}.")
         return Response({"error": "This email is already in use. Try with a different one."}, status=400)
     
+    
+    #Checks if a class exists
     try:
         cls = Class.objects.get(id=class_id)
     except Class.DoesNotExist:
         logger.error(f"Invalid class_id: {class_id}.")
         return Response({"error": "Class not found."}, status=404)
     
+    
+    #Checks if any slot left
     if cls.slots_available <= 0:
         logger.warning(f"Attempt to overbook class {cls.id}.")
         return Response({"error": "No slots available."}, status=400)
     
+
+    #Daily and weekly booking bounds
     #Get client's timezone
     client_tz = get_client_timezone(request)
 
-    #Get current datetime in UTC and convert to client's timezone
-    now_utc = timezone.now()
-    now = now_utc.astimezone(client_tz)
+    today_start_utc, today_end_utc = get_daily_bounds(client_tz)
+    week_start_utc, week_end_utc = get_weekly_bounds(client_tz)
 
-    #Calculate start and end of client's local day
-    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-    today_end = today_start + timedelta(days=1)
-
-    #Calculate start and end of client's local week
-    week_start = today_start - timedelta(days=today_start.weekday())
-    week_end = week_start + timedelta(days=7)
-
-    #Convert back to UTC for querying DB
-    today_start_utc = today_start.astimezone(pytz.UTC)
-    today_end_utc = today_end.astimezone(pytz.UTC)
-    week_start_utc = week_start.astimezone(pytz.UTC)
-    week_end_utc = week_end.astimezone(pytz.UTC)
-
-    #filter for a day's bookings by this email
-    today_bookings = Booking.objects.filter(
-        client_email = email,
-        booked_at__range = (today_start_utc, today_end_utc)
-    )
-
-    #filter for a week's bookings by this email
-    weekly_bookings = Booking.objects.filter(
-        client_email=email,
-        booked_at__range=(week_start_utc, week_end_utc) 
-    )
-
-    #Enforce limits (daily=3, weekly=12)
-    if today_bookings.count()>= 3:
-        logger.warning(f"Booking denied for {email}. Exceeded daily booking limit (timezone: {client_tz}).")
-        return Response({"error": "You can only book up to 3 classes per day."}, status=400)
+    #Check daily booking limit
+    daily_limit_response = check_daily_limit(email, client_tz, today_start_utc, today_end_utc)
+    if daily_limit_response:
+        return daily_limit_response
     
-    if weekly_bookings.count() >= 12:
-        logger.warning(f"Booking denied for {email}: exceeded weekly booking limit. (timezone: {client_tz}).")
-        return Response({"error": "You can only book up to 12 classes per week."}, status=400)
-    
-    if Booking.objects.filter(class_booked=cls, client_email=email).exists():
+    #Check weekly booking limit
+    weekly_limit_response = check_weekly_limit(email, client_tz, week_start_utc, week_end_utc)
+    if weekly_limit_response:
+        return weekly_limit_response
+
+
+    #Checks duplicate booking of a class by an email
+    if has_duplicate_booking(email, cls):
         logger.info(f"Duplicate booking attempt by {email}.")
         return Response({"error": "You have already booked this class."}, status=400)
     
+
+    #Reduces available slots upon successful booking
     booking = Booking.objects.create(
         class_booked=cls,
         client_name=name,
@@ -128,6 +117,7 @@ def book_class(request):
     )
     cls.slots_available -= 1
     cls.save()
+
 
     logger.info(f"Booking created for {email} in {cls.id}.")
     serializer = BookingSerializer(booking)
@@ -142,13 +132,15 @@ def get_bookings(request):
         logger.warning("Missing email query parameter in GET /bookings request.")
         return Response({"error": "Email is required as a query parameter"}, status=400)
     
+
     email = email.strip()
 
     #Email validation
-    if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+    if not is_valid_email(email):
         logger.warning(f"Email validation failed for {email}. Invalid email format.")
         return Response({"error": "Invalid email format."}, status=400)
     
+
     logger.info(f"Fetching bookings for {email}.")
 
     bookings = Booking.objects.filter(client_email=email).order_by('-booked_at') #sorts the bookings in descending order
@@ -157,6 +149,7 @@ def get_bookings(request):
         logger.info(f"No bookings found for {email}.")
         return Response({"error": "No bookings found for this email."}, status=404)
     
+
     logger.info(f"{bookings.count()} bookings found for {email}")
     client_tz = get_client_timezone(request)
     serializer = BookingSummarySerializer(bookings, many=True, context={'client_tz': client_tz})
