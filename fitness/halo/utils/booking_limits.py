@@ -3,7 +3,7 @@ from rest_framework import status
 from halo.models import Booking
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('halo')
 
 #Daily booking limit
 def check_daily_limit(email, client_tz, today_start_utc, today_end_utc):
