@@ -142,12 +142,13 @@ python manage.py test halo
 
 ##  Sample API Requests (Postman Format)
 
- ### GET /classes
- **Request:**  
+### 1. GET /classes
+
+**Request:**  
 `GET http://127.0.0.1:8000/classes/`
 
 **Success Response:**
- ```json
+```json
  [
   {
     "id": 2,
@@ -155,29 +156,30 @@ python manage.py test halo
     "name": "Zumba",
     "instructor": "Kavya Iyer",
     "slots_available": 2
-  },
+  }
 ]
 ```
 
 ---
 
-### POST /book
- **Request:**
+### 2. POST /book
 
- ```json
- POST http://127.0.0.1:8000/book/
- Headers: Content-Type: application/json
+**Request:**
+ `POST http://127.0.0.1:8000/book/`
+ `Headers: Content-Type: application/json`
+
+```json
  {
   "class_id": 5,
   "client_name": "Hari Krishnan",
   "client_email": "hari@example.com"
 }
- ```
+```
 
 **Success Response:**
 
- ```json
- [
+```json
+
 {
     "message": "Booking successful",
     "booking": {
@@ -188,73 +190,73 @@ python manage.py test halo
         "class_booked": 5
     }
 }
- ]
- ```
+```
 
- **Responses:** - Missing Fields:
+**Responses:** Missing Fields:
 
- ```json
+```json
  { "error": "Missing fields: client_email." }
- ```
+```
 
- **Responses:** - Invalid Name:
+**Responses:** Invalid Name:
 
- ```json
+```json
  { "error": "Name must contain only letters and spaces." }
 ```
 
- **Responses:** - Invalid Email:
+**Responses:** Invalid Email:
 
- ```json
+```json
  { "error": "Invalid email format." }
 ```
 
- **Responses:** - Email taken:
+**Responses:** Email taken:
 
- ```json
+```json
  { "error": "This email is already in use. Try with a different one."}
- ```
+```
 
- **Responses:** - No such class exists:
+**Responses:** No such class exists:
 
- ```json
+```json
  { "error": "Class not found."}
- ```
+```
 
- **Responses:** - Overbooking:
+**Responses:** Overbooking:
 
- ```json
+```json
  { "error": "No slots available." }
- ```
+```
 
- **Responses:** - Daily Limit:
+**Responses:** Daily Limit:
 
- ```json
+```json
  { "error": "You can only book up to 3 classes per day." }
- ```
+```
 
- **Responses:** - Weekly Limit:
+**Responses:** Weekly Limit:
 
- ```json
+```json
  { "error": "You can only book up to 12 classes per week." }
- ```
+```
 
-**Responses:** - Duplicate:
+**Responses:** Duplicate:
 
- ```json
+```json
  { "error": "You have already booked this class." }
 ```
 
 ---
 
- ### GET /bookings
+### GET /bookings
 
- **Request:**  
+**Request:**  
+
 `GET http://127.0.0.1:8000/bookings/?email=rahul@example.com`
 
- **Success Response:**
+**Success Response:**
 
- ```json
+```json
  [
   {
     "id": 5,
@@ -268,27 +270,32 @@ python manage.py test halo
     "booked_at": "2025-06-05 07:29 PM"
   }
  ]
- ```
+```
 
- **Missing Email:**
+**Missing Email:**
 
- ```json
+```json
  { "error": "Email is required as a query parameter" }
- ```
+```
 
- **Invalid Email Format:**
+**Invalid Email Format:**
 
- ```json
+```json
  { "error": "Invalid email format." }
- ```
+```
 
- **No Bookings:**
+**No Bookings:**
 
- ```json
+```json
  { "error": "No bookings found for this email." }
- ```
+```
 
 
- ---
+---
+
+## Author
+
+**V S Sreedevi**  
+[GitHub: Sreedevi0602](https://github.com/Sreedevi0602)
 
 
