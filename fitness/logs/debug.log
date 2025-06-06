@@ -1205,3 +1205,123 @@ Not Found: /bookings/
 Fetching bookings for john@example.com.
 1 bookings found for john@example.com
 Booking created for john@example.com in 1.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Not Found: /
+Not Found: /
+"GET / HTTP/1.1" 404 2938
+"GET / HTTP/1.1" 404 2938
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+"GET /favicon.ico HTTP/1.1" 404 2989
+"GET /favicon.ico HTTP/1.1" 404 2989
+Not Found: /
+Not Found: /
+"GET / HTTP/1.1" 404 2938
+"GET / HTTP/1.1" 404 2938
+Not Found: /
+Not Found: /
+"GET / HTTP/1.1" 404 2938
+"GET / HTTP/1.1" 404 2938
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Not Found: /
+Not Found: /
+"GET / HTTP/1.1" 404 2938
+"GET / HTTP/1.1" 404 2938
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+"GET /favicon.ico HTTP/1.1" 404 2989
+"GET /favicon.ico HTTP/1.1" 404 2989
+"GET /classes/ HTTP/1.1" 200 11043
+"GET /classes/ HTTP/1.1" 200 11043
+"GET /static/rest_framework/css/prettify.css HTTP/1.1" 304 0
+"GET /static/rest_framework/css/bootstrap.min.css HTTP/1.1" 304 0
+"GET /static/rest_framework/css/bootstrap-tweaks.css HTTP/1.1" 304 0
+"GET /static/rest_framework/css/default.css HTTP/1.1" 304 0
+"GET /static/rest_framework/css/prettify.css HTTP/1.1" 304 0
+"GET /static/rest_framework/css/bootstrap.min.css HTTP/1.1" 304 0
+"GET /static/rest_framework/css/bootstrap-tweaks.css HTTP/1.1" 304 0
+"GET /static/rest_framework/css/default.css HTTP/1.1" 304 0
+"GET /static/rest_framework/js/jquery-3.7.1.min.js HTTP/1.1" 304 0
+"GET /static/rest_framework/js/csrf.js HTTP/1.1" 304 0
+"GET /static/rest_framework/js/ajax-form.js HTTP/1.1" 304 0
+"GET /static/rest_framework/js/bootstrap.min.js HTTP/1.1" 304 0
+"GET /static/rest_framework/js/bootstrap.min.js HTTP/1.1" 304 0
+"GET /static/rest_framework/js/prettify-min.js HTTP/1.1" 304 0
+"GET /static/rest_framework/js/jquery-3.7.1.min.js HTTP/1.1" 304 0
+"GET /static/rest_framework/js/csrf.js HTTP/1.1" 304 0
+"GET /static/rest_framework/js/ajax-form.js HTTP/1.1" 304 0
+"GET /static/rest_framework/js/default.js HTTP/1.1" 304 0
+"GET /static/rest_framework/js/prettify-min.js HTTP/1.1" 304 0
+"GET /static/rest_framework/js/default.js HTTP/1.1" 304 0
+"GET /static/rest_framework/img/grid.png HTTP/1.1" 304 0
+"GET /static/rest_framework/js/load-ajax-form.js HTTP/1.1" 304 0
+"GET /static/rest_framework/js/load-ajax-form.js HTTP/1.1" 304 0
+"GET /static/rest_framework/img/grid.png HTTP/1.1" 304 0
+Not Found: /booking
+Not Found: /booking
+"GET /booking HTTP/1.1" 404 2977
+"GET /booking HTTP/1.1" 404 2977
+"GET /book HTTP/1.1" 301 0
+"GET /book HTTP/1.1" 301 0
+Method Not Allowed: /book/
+Method Not Allowed: /book/
+"GET /book/ HTTP/1.1" 405 5579
+"GET /book/ HTTP/1.1" 405 5579
+Fetching bookings for rahul@example.com.
+3 bookings found for rahul@example.com
+"GET /bookings/?email=rahul@example.com HTTP/1.1" 200 6501
+"GET /bookings/?email=rahul@example.com HTTP/1.1" 200 6501
+"GET /classes/ HTTP/1.1" 200 2536
+"GET /classes/ HTTP/1.1" 200 2536
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Method Not Allowed: /book/
+Method Not Allowed: /book/
+"GET /book/ HTTP/1.1" 405 5579
+"GET /book/ HTTP/1.1" 405 5579
+Bad Request: /book/
+Bad Request: /book/
+"POST /book/ HTTP/1.1" 400 5581
+"POST /book/ HTTP/1.1" 400 5581
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Booking created for sara@example.com in 6.
+"POST /book/ HTTP/1.1" 201 5874
+"POST /book/ HTTP/1.1" 201 5874
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Booking created for jack@example.com in 8.
+"POST /book/ HTTP/1.1" 201 5874
+"POST /book/ HTTP/1.1" 201 5874
+Invalid class_id: 9999.
+Not Found: /book/
+Not Found: /book/
+Email validation failed for client_email: 'johnexample.com'. Invalid email format.
+Bad Request: /book/
+Bad Request: /book/
+Name validation failed for client_name: 'John123'. Name must contain only letters and spaces.
+Bad Request: /book/
+Bad Request: /book/
+Missing fields: ['class_id', 'client_name', 'client_email'].
+Bad Request: /book/
+Bad Request: /book/
+Attempt to overbook class 1.
+Bad Request: /book/
+Bad Request: /book/
+Booking created for john@example.com in 1.
+No upcoming classes found.
+Email validation failed for invalidemail. Invalid email format.
+Bad Request: /bookings/
+Bad Request: /bookings/
+Missing email query parameter in GET /bookings request.
+Bad Request: /bookings/
+Bad Request: /bookings/
+Fetching bookings for nobookings@example.com.
+No bookings found for nobookings@example.com.
+Not Found: /bookings/
+Not Found: /bookings/
+Fetching bookings for john@example.com.
+1 bookings found for john@example.com
+Booking created for john@example.com in 1.
