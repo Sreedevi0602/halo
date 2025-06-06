@@ -1145,3 +1145,63 @@ Not Found: /bookings/
 Fetching bookings for john@example.com.
 1 bookings found for john@example.com
 Booking created for john@example.com in 1.
+Invalid class_id: 9999.
+Not Found: /book/
+Not Found: /book/
+Email validation failed for client_email: 'johnexample.com'. Invalid email format.
+Bad Request: /book/
+Bad Request: /book/
+Name validation failed for client_name: 'John123'. Name must contain only letters and spaces.
+Bad Request: /book/
+Bad Request: /book/
+Missing fields: ['class_id', 'client_name', 'client_email'].
+Bad Request: /book/
+Bad Request: /book/
+Attempt to overbook class 1.
+Bad Request: /book/
+Bad Request: /book/
+Booking created for john@example.com in 1.
+No upcoming classes found.
+Email validation failed for invalidemail. Invalid email format.
+Bad Request: /bookings/
+Bad Request: /bookings/
+Missing email query parameter in GET /bookings request.
+Bad Request: /bookings/
+Bad Request: /bookings/
+Fetching bookings for nobookings@example.com.
+No bookings found for nobookings@example.com.
+Not Found: /bookings/
+Not Found: /bookings/
+Fetching bookings for john@example.com.
+1 bookings found for john@example.com
+Booking created for john@example.com in 1.
+Invalid class_id: 9999.
+Not Found: /book/
+Not Found: /book/
+Email validation failed for client_email: 'johnexample.com'. Invalid email format.
+Bad Request: /book/
+Bad Request: /book/
+Name validation failed for client_name: 'John123'. Name must contain only letters and spaces.
+Bad Request: /book/
+Bad Request: /book/
+Missing fields: ['class_id', 'client_name', 'client_email'].
+Bad Request: /book/
+Bad Request: /book/
+Attempt to overbook class 1.
+Bad Request: /book/
+Bad Request: /book/
+Booking created for john@example.com in 1.
+No upcoming classes found.
+Email validation failed for invalidemail. Invalid email format.
+Bad Request: /bookings/
+Bad Request: /bookings/
+Missing email query parameter in GET /bookings request.
+Bad Request: /bookings/
+Bad Request: /bookings/
+Fetching bookings for nobookings@example.com.
+No bookings found for nobookings@example.com.
+Not Found: /bookings/
+Not Found: /bookings/
+Fetching bookings for john@example.com.
+1 bookings found for john@example.com
+Booking created for john@example.com in 1.

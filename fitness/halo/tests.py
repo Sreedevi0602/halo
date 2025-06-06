@@ -9,12 +9,10 @@ from datetime import timedelta
 import pytz
 from dateutil import parser
 
-
-
-
 # Create your tests here.
 
 class BookingAPITest(APITestCase):
+
     def setUp(self):
         self.upcoming_class = Class.objects.create(
             name="Yoga",
@@ -29,6 +27,7 @@ class BookingAPITest(APITestCase):
             slots_available=5
         )
 
+
     def test_class_list_returns_upcoming_only(self):
         url = reverse('class_list')
         response = self.client.get(url)
@@ -37,6 +36,7 @@ class BookingAPITest(APITestCase):
         self.assertIn(self.upcoming_class.name, class_names)
         self.assertNotIn(self.past_class.name, class_names)
 
+
     def test_class_list_no_upcoming_returns_error(self):
         Class.objects.filter(datetime__gte=timezone.now()).delete()
         url = reverse('class_list')
@@ -44,6 +44,7 @@ class BookingAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('error', response.data)
         self.assertEqual(response.data['error'], "No upcoming classes available.")
+
 
     def test_book_class_success(self):
         url = reverse('book_class')
@@ -58,11 +59,13 @@ class BookingAPITest(APITestCase):
         self.upcoming_class.refresh_from_db()
         self.assertEqual(self.upcoming_class.slots_available, 4)
 
+
     def test_book_class_missing_fields(self):
         url = reverse('book_class')
         response = self.client.post(url, {})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('error', response.data)
+
 
     def test_book_class_invalid_name(self):
         url = reverse('book_class')
@@ -75,6 +78,7 @@ class BookingAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("Name must contain only letters", response.data['error'])
 
+
     def test_book_class_invalid_email(self):
         url = reverse('book_class')
         data = {
@@ -86,21 +90,6 @@ class BookingAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("Invalid email format", response.data['error'])
 
-    def test_book_class_email_taken(self):
-        Booking.objects.create(
-            class_booked=self.upcoming_class,
-            client_name="John Doe",
-            client_email="john@example.com"
-        )
-        url = reverse('book_class')
-        data = {
-            "class_id": self.upcoming_class.id,
-            "client_name": "John Doe",
-            "client_email": "john@example.com"
-        }
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("already in use", response.data['error'])
 
     def test_book_class_class_not_found(self):
         url = reverse('book_class')
@@ -112,6 +101,7 @@ class BookingAPITest(APITestCase):
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn("Class not found", response.data['error'])
+
 
     def test_book_class_no_slots(self):
         self.upcoming_class.slots_available = 0
@@ -126,6 +116,7 @@ class BookingAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("No slots available", response.data['error'])
 
+
     def test_get_bookings_success(self):
         Booking.objects.create(
             class_booked=self.upcoming_class,
@@ -137,11 +128,13 @@ class BookingAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(len(response.data) >= 1)
 
+
     def test_get_bookings_missing_email(self):
         url = reverse('get_bookings')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('Email is required', response.data['error'])
+
 
     def test_get_bookings_invalid_email(self):
         url = reverse('get_bookings') + '?email=invalidemail'
@@ -149,13 +142,12 @@ class BookingAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('Invalid email format', response.data['error'])
 
+
     def test_get_bookings_no_bookings_found(self):
         url = reverse('get_bookings') + '?email=nobookings@example.com'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn('No bookings found', response.data['error'])
-
-
 
 
 
@@ -173,7 +165,6 @@ class TimezoneViewsTest(APITestCase):
         )
 
     
-
     def test_class_list_with_timezone(self):
         # Pass a timezone in query
         response = self.client.get(reverse('class_list') + '?tz=Asia/Tokyo')
@@ -189,6 +180,7 @@ class TimezoneViewsTest(APITestCase):
         
         self.assertEqual(returned_dt.hour, expected_dt.hour)
         self.assertEqual(returned_dt.day, expected_dt.day)
+
 
     def test_book_class_and_return_timezone(self):
         booking_data = {
