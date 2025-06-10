@@ -85,7 +85,7 @@ Fetches all bookings made by a specific client email.
 ### Clone the repository
 
 ```cmd
-git clone <repo url>
+git clone https://github.com/Sreedevi0602/halo.git
 cd halo
 ```
 
